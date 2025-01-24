@@ -13,20 +13,57 @@ struct HomeView: View {
 
     var body: some View {
         VStack {
+            VStack(alignment: .leading) {
+                HStack {
+                    Text("Filters")
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+
+                TextField(text: $viewModel.searchText, label: { Text("Filter by City Name...") })
+                    .frame(maxWidth: 200)
+                    .padding()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(.blue, lineWidth: 1)
+                    )
+
+                HStack {
+                    Button {
+                        print("Show Favorites")
+                    } label: {
+                        HStack {
+                            Text("Show Only Favorites")
+                            Image(systemName: "star.fill")
+                                .resizable()
+                                .frame(width: 16, height: 16, alignment: .center)
+                        }
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(.blue, lineWidth: 1)
+                        )
+                    }
+                    Spacer()
+                }
+            }
+            .padding(.vertical)
+
             if viewModel.loadingData {
-                ProgressView(label: { Text("Loading...") })
+                ProgressView(label: { Text("Fetching Data...").bold() })
             }
 
-            Text("Cities")
-                .onAppear { viewModel.fetchItems() }
-
-            Button {
-
-            } label: {
-                Text("test")
+            List(viewModel.cities, id: \.self) { city in
+                CellView(city: city.name, country: city.country)
+                    .frame(width: 300, height: 60)
             }
+            .padding()
+
+            Spacer()
 
         }
+        .padding(16)
+        .onAppear { viewModel.fetchItems() }
     }
 }
 

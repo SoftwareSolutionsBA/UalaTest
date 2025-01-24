@@ -8,18 +8,18 @@
 
 import Foundation
 
-struct City: Codable {
+struct City: Codable, Hashable {
     let country: String
     let name: String
     let id: Int32
-    let lon: Double
-    let lat: Double
+//    let lon: Double
+//    let lat: Double
 
     enum CodingKeys: String, CodingKey {
         case country
         case name
         case id = "_id"
-        case lon
-        case lat
+//        case lon
+//        case lat
     }
 }

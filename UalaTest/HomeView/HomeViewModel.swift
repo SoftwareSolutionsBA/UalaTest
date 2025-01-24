@@ -14,17 +14,23 @@ class HomeViewModel: ObservableObject {
     let apiClient: APIClientProtocol
 
     @Published var loadingData = false
+    @Published var searchText: String = ""
+    @Published var cities: [City] = []
 
-    init(apiClient: APIClientProtocol = APIClient()) {
+    init(apiClient: APIClientProtocol = APIClient(),
+         cities: [City] = []) {
+
         self.context = PersistenceManager.shared.container.newBackgroundContext()
         self.apiClient = apiClient
+        self.cities = cities
     }
 
     func fetchItems() {
         self.loadingData = true
-        Task(priority: .utility, operation: {
-            let cities = await apiClient.fetchCities()
+        Task(priority: .low, operation: {
+            let result = await apiClient.fetchCities()
             await MainActor.run { [weak self] in
+                self?.cities = result
                 self?.loadingData = false
             }
         })

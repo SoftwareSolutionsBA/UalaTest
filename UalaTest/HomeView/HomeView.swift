@@ -53,12 +53,13 @@ struct HomeView: View {
                 ProgressView(label: { Text("Fetching Data...").bold() })
             }
 
-            List(viewModel.cities, id: \.self) { city in
-                CellView(city: city.name, country: city.country)
-                    .frame(width: 300, height: 60)
+            ScrollView {
+                LazyVStack(alignment: .leading) {
+                    ForEach(viewModel.cities, id: \.self) { city in
+                        CellView(city: city.name, country: city.country)
+                    }
+                }
             }
-            .padding()
-
             Spacer()
 
         }

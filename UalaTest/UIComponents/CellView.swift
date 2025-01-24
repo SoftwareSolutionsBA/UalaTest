@@ -12,8 +12,9 @@ struct CellView: View {
     let country: String
 
     var body: some View {
-        HStack {
+        HStack(alignment: .center) {
             VStack(alignment: .leading) {
+                Divider()
                 Text(city)
                     .font(.headline)
                     .bold()
@@ -22,8 +23,8 @@ struct CellView: View {
                     .font(.subheadline)
                     .italic()
             }
-            .padding()
             Spacer()
         }
+        .frame(width: 300, height: 60)
     }
 }

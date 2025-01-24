@@ -12,7 +12,21 @@ struct HomeView: View {
     @StateObject var viewModel: HomeViewModel = HomeViewModel()
 
     var body: some View {
-        Text("Cities")
+        VStack {
+            if viewModel.loadingData {
+                ProgressView(label: { Text("Loading...") })
+            }
+
+            Text("Cities")
+                .onAppear { viewModel.fetchItems() }
+
+            Button {
+
+            } label: {
+                Text("test")
+            }
+
+        }
     }
 }
 

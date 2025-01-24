@@ -14,8 +14,22 @@ class HomeViewModel: ObservableObject {
     let apiClient: APIClientProtocol
 
     @Published var loadingData = false
-    @Published var searchText: String = ""
+    @Published var notFound = false
+    @Published var searchText: String = "" {
+        didSet {
+            guard searchText.count >= 1 else {
+                displayedCities = cities
+                notFound = false
+                return
+            }
+            displayedCities = cities.filter({ city in
+                city.name.contains(searchText)
+            })
+            notFound = displayedCities.count == 0
+        }
+    }
     @Published var cities: [City] = []
+    @Published var displayedCities: [City] = []
 
     init(apiClient: APIClientProtocol = APIClient(),
          cities: [City] = []) {
@@ -31,6 +45,7 @@ class HomeViewModel: ObservableObject {
             let result = await apiClient.fetchCities()
             await MainActor.run { [weak self] in
                 self?.cities = result
+                self?.displayedCities = result
                 self?.loadingData = false
             }
         })

@@ -53,13 +53,18 @@ struct HomeView: View {
                 ProgressView(label: { Text("Fetching Data...").bold() })
             }
 
-            ScrollView {
-                LazyVStack(alignment: .leading) {
-                    ForEach(viewModel.cities, id: \.self) { city in
-                        CellView(city: city.name, country: city.country)
+            if viewModel.notFound {
+                Text("NOT FOUND").bold()
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading) {
+                        ForEach(viewModel.displayedCities, id: \.self) { city in
+                            CellView(city: city.name, country: city.country)
+                        }
                     }
                 }
             }
+            
             Spacer()
 
         }

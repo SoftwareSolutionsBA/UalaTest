@@ -56,6 +56,16 @@ class HomeViewModel: ObservableObject {
 
     }
 
+    func showOnlyFavorites(_ favorites: Bool) {
+        if favorites {
+            displayedCities = displayedCities.filter({ city in
+                city.isFavorite == true
+            })
+        } else {
+            displayedCities = cities
+        }
+    }
+
     private func filterItems(_ searchText: String) {
         guard searchText.count >= 1 else {
             displayedCities = cities

@@ -12,14 +12,18 @@ struct City: Codable, Hashable {
     let country: String
     let name: String
     let id: Int32
-//    let lon: Double
-//    let lat: Double
+    let coordinates: Coordinates
+    var isFavorite: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case country
         case name
         case id = "_id"
-//        case lon
-//        case lat
+        case coordinates = "coord"
     }
+}
+
+struct Coordinates: Codable, Hashable {
+    let lon: Double
+    let lat: Double
 }

@@ -46,47 +46,20 @@ class HomeViewModel: ObservableObject {
         self.loadingData = true
         Task(priority: .low, operation: {
             let result = await apiClient.fetchCities()
-            let aux = result.count == 0 ? fetchStoredItems().map({ City(country: $0.country ?? "",
-                                                                        name: $0.name ?? "",
-                                                                        id: $0.id,
-                                                                        coordinates: Coordinates(lon: $0.lon, lat: $0.lat)) }) : []
+            result.count > 0 ? storeItems(cities: result) : ()
+
+            let storedObjects = fetchStoredItems().map({ City(country: $0.country ?? "",
+                                                              name: $0.name ?? "",
+                                                              id: $0.id,
+                                                              coordinates: Coordinates(lon: $0.lon, lat: $0.lat),
+                                                              isFavorite: $0.isFavorite) })
+
             await MainActor.run { [weak self] in
-                self?.cities = result.count == 0 ? aux : result
-                self?.displayedCities = result.count == 0 ? aux : result
+                self?.cities = storedObjects.count > 0 ? storedObjects : result
+                self?.displayedCities = storedObjects.count > 0 ? storedObjects : result
                 self?.loadingData = false
-                result.count > 0 ? self?.storeItems(cities: result) : ()
             }
         })
-    }
-
-    func storeItems(cities: [City]) {
-        let storedItems = fetchStoredItems()
-        var itemsToBeStored = [CityObject]()
-        for city in cities {
-            if !storedItems.contains(where: { $0.id == city.id }) {
-                let object = CityObject(context: context)
-                object.id = city.id
-                object.name = city.name
-                object.country = city.country
-                object.lat = city.coordinates.lat
-                object.lon = city.coordinates.lon
-                object.isFavorite = city.isFavorite
-                itemsToBeStored.append(object)
-            }
-        }
-        try? context.save()
-    }
-
-    func fetchStoredItems() -> [CityObject] {
-        let fetchRequest: NSFetchRequest<CityObject> = CityObject.fetchRequest()
-        do {
-            let result = try context.fetch(fetchRequest)
-            return result
-        } catch {
-            print("Error fetching data: \(error)")
-            return []
-        }
-
     }
 
     func showOnlyFavorites(_ favorites: Bool) {
@@ -110,5 +83,55 @@ class HomeViewModel: ObservableObject {
             city.name.lowercased().contains(searchText.lowercased())
         })
         notFound = displayedCities.count == 0
+    }
+
+    // MARK: PERSISTENCE CORE DATA
+    func storeItems(cities: [City]) {
+        Task(priority: .utility, operation: {
+            let storedItems = fetchStoredItems()
+            var itemsToBeStored = [CityObject]()
+            for city in cities {
+                if !storedItems.contains(where: { $0.id == city.id }) {
+                    let object = CityObject(context: context)
+                    object.id = city.id
+                    object.name = city.name
+                    object.country = city.country
+                    object.lat = city.coordinates.lat
+                    object.lon = city.coordinates.lon
+                    object.isFavorite = city.isFavorite
+                    itemsToBeStored.append(object)
+                }
+            }
+            try? context.save()
+        })
+    }
+
+    func fetchStoredItems() -> [CityObject] {
+        let fetchRequest: NSFetchRequest<CityObject> = CityObject.fetchRequest()
+        do {
+            let result = try context.fetch(fetchRequest)
+            return result
+        } catch {
+            print("Error fetching data: \(error)")
+            return []
+        }
+
+    }
+
+    func toggleFavorite(_ id: Int32) {
+        if let index = displayedCities.firstIndex(where: { $0.id == id }) {
+            displayedCities[index].isFavorite.toggle()
+        }
+        if let index = cities.firstIndex(where: { $0.id == id }) {
+            cities[index].isFavorite.toggle()
+        }
+
+        Task(priority: .low, operation: {
+            let fetchRequest: NSFetchRequest<CityObject> = CityObject.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", "\(id)")
+            let result = try context.fetch(fetchRequest).first
+            result?.isFavorite.toggle()
+            try? result?.managedObjectContext?.save()
+        })
     }
 }

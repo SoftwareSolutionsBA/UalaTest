@@ -103,7 +103,7 @@ struct HomeView: View {
             Text("Lon \(city.wrappedValue.coordinates.lon)").font(.caption)
 
             Button {
-                city.wrappedValue.isFavorite.toggle()
+                viewModel.toggleFavorite(city.wrappedValue.id)
             } label: {
                 HStack {
                     Text("Favorite").font(.caption)

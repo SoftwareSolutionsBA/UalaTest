@@ -38,6 +38,8 @@ class HomeViewModel: ObservableObject {
             self?.filterItems(searchText)
             self?.isFilteringItems = false
         }.store(in: &cancellables)
+
+        fetchItems()
     }
 
     func fetchItems() {

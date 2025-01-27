@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct City: Codable, Hashable {
     let country: String
@@ -26,4 +27,10 @@ struct City: Codable, Hashable {
 struct Coordinates: Codable, Hashable {
     let lon: Double
     let lat: Double
+}
+
+
+struct Location: Identifiable {
+    var id = UUID()
+    var coordinate: CLLocationCoordinate2D
 }

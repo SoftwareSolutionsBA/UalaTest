@@ -81,9 +81,13 @@ struct HomeView: View {
 
     @ViewBuilder
     func mapView(in region: MKCoordinateRegion) -> some View {
-        Map(coordinateRegion: .constant(region))
-            .cornerRadius(10)
-            .padding(5)
+        Map(coordinateRegion: .constant(region),
+            annotationItems: [Location(coordinate: CLLocationCoordinate2D(latitude: region.center.latitude,
+                                                                          longitude: region.center.longitude))]) { location in
+            MapMarker(coordinate: location.coordinate, tint: .red)
+        }
+        .cornerRadius(10)
+        .padding(5)
     }
 
     @ViewBuilder

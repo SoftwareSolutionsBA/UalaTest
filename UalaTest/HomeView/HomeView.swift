@@ -20,17 +20,26 @@ struct HomeView: View {
                     Spacer()
                 }
 
-                TextField(text: $viewModel.searchText, label: { Text("Filter by City Name...") })
-                    .frame(maxWidth: 200)
-                    .padding()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(.blue, lineWidth: 1)
-                    )
+                ZStack(alignment: .trailing) {
+                    TextField(text: $viewModel.searchText, label: { Text("Filter by City Name...").font(.callout) })
+                        .padding()
+                        .padding(.trailing, viewModel.isFilteringItems ? 20 : 0)
+
+                    if viewModel.isFilteringItems {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                            .padding(.horizontal, 10)
+                    }
+                }
+                .frame(maxWidth: 230, minHeight: 55)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.blue, lineWidth: 1)
+                )
 
                 HStack {
                     Button {
-                        print("Show Favorites")
+                        print("Show Favoritess")
                     } label: {
                         HStack {
                             Text("Show Only Favorites")
@@ -43,6 +52,7 @@ struct HomeView: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(.blue, lineWidth: 1)
                         )
+                        .frame(minHeight: 55)
                     }
                     Spacer()
                 }

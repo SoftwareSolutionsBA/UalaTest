@@ -7,29 +7,25 @@
 
 import Foundation
 import CoreData
+import Combine
 
-//@MainActor
 class HomeViewModel: ObservableObject {
     let context: NSManagedObjectContext
     let apiClient: APIClientProtocol
 
     @Published var loadingData = false
     @Published var notFound = false
+    @Published var isFilteringItems = false
     @Published var searchText: String = "" {
         didSet {
-            guard searchText.count >= 1 else {
-                displayedCities = cities
-                notFound = false
-                return
-            }
-            displayedCities = cities.filter({ city in
-                city.name.contains(searchText)
-            })
-            notFound = displayedCities.count == 0
+            guard searchText.count >= 2 else { return }
+            isFilteringItems = true
         }
     }
     @Published var cities: [City] = []
     @Published var displayedCities: [City] = []
+
+    private var cancellables = Set<AnyCancellable>()
 
     init(apiClient: APIClientProtocol = APIClient(),
          cities: [City] = []) {
@@ -37,6 +33,11 @@ class HomeViewModel: ObservableObject {
         self.context = PersistenceManager.shared.container.newBackgroundContext()
         self.apiClient = apiClient
         self.cities = cities
+
+        $searchText.debounce(for: .seconds(0.3), scheduler: RunLoop.main).sink { [weak self] searchText in
+            self?.filterItems(searchText)
+            self?.isFilteringItems = false
+        }.store(in: &cancellables)
     }
 
     func fetchItems() {
@@ -53,5 +54,18 @@ class HomeViewModel: ObservableObject {
 
     func storeItems() {
 
+    }
+
+    private func filterItems(_ searchText: String) {
+        guard searchText.count >= 1 else {
+            displayedCities = cities
+            notFound = false
+            return
+        }
+
+        displayedCities = cities.filter({ city in
+            city.name.lowercased().contains(searchText.lowercased())
+        })
+        notFound = displayedCities.count == 0
     }
 }

@@ -30,6 +30,8 @@ struct HomeView: View {
                             ProgressView(label: { Text("Fetching Data...").bold() })
                         }
 
+                        Text("Displaying \(viewModel.displayedCities.count) items...").font(.caption)
+
                         if viewModel.notFound {
                             Text("NOT FOUND").bold()
                         } else {
